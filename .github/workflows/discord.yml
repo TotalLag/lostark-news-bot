@@ -1,0 +1,50 @@
+name: Notify Discord Lost Ark News
+
+on:
+  push:
+    branches:
+      - preview
+  schedule:
+   - cron: '*/15 * * * *'
+
+env:
+  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+  DISCORD_USERNAME: Automation
+  GITHUB_BRANCH: main
+  DESCRIPTION: Post Lost Ark News
+
+jobs:
+  Run_Script:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ env.GITHUB_BRANCH }}
+    - name: Cache data
+      uses: actions/cache@v2
+      with:
+        path: title.dat
+        key: data-${{ hashFiles('title.dat') }}
+        restore-keys: data-
+    - name: Cache dependencies
+      uses: actions/cache@v2
+      with:
+        path: ~/.npm
+        key: npm-${{ hashFiles('package-lock.json') }}
+        restore-keys: npm-
+    - name: Install dependencies
+      run: npm ci --cache ~/.npm --prefer-offline --no-audit --production
+    - run: node index.js
+    - name: Post status to Discord
+      uses: sarisia/actions-status-discord@v1
+      if: failure()
+      with:
+          webhook: ${{ env.DISCORD_WEBHOOK }}
+          status: ${{ job.status }}
+          job: Build
+          description: ${{ env.DESCRIPTION }}
+          nofail: false
+          nodetail: false
+          color: 0xFF0000
+          username: ${{ env.DISCORD_USERNAME }}
+          avatar_url: "https://codebot.cc/img/codebot-logo.png"
