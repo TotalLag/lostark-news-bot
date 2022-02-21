@@ -5,7 +5,7 @@ on:
     branches:
       - preview
   schedule:
-   - cron: '*/15 * * * *'
+   - cron: '*/15 16-23,0-5 * * *' # Every 15 minutes from 12am through 5am and 4pm through 11pm
 
 env:
   DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
