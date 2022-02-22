@@ -35,6 +35,11 @@ jobs:
     - name: Install dependencies
       run: npm ci --cache ~/.npm --prefer-offline --no-audit --production
     - run: node index.js
+    - name: Cache data again
+      uses: actions/cache@v2
+      with:
+        path: title.dat
+        key: data-${{ hashFiles('title.dat') }}
     - name: Post status to Discord
       uses: sarisia/actions-status-discord@v1
       if: failure()
